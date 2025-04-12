@@ -1,71 +1,58 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import DashboardGrid from "@/components/DashboardGrid";
+import { MoonIcon, SunIcon } from "@heroicons/react/24/outline";
 
 export default function Home() {
-  const [isSidebarVisible, setIsSidebarVisible] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
 
-  // Toggle sidebar visibility
-  const toggleSidebar = () => {
-    setIsSidebarVisible((prev) => !prev);
+  useEffect(() => {
+    const storedTheme = localStorage.getItem("darkMode");
+    if (storedTheme === "true") {
+      setIsDarkMode(true);
+    } else if (storedTheme === "false") {
+      setIsDarkMode(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("darkMode", isDarkMode.toString());
+    document.documentElement.classList.toggle("dark", isDarkMode); // Apply dark class to root
+  }, [isDarkMode]);
+
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode);
   };
 
   return (
-    <div className="min-h-screen flex bg-gray-100">
-      {/* Sidebar */}
-      <aside
-        className={`w-64 bg-white shadow-md p-4 flex flex-col transition-all duration-300 ${
-          isSidebarVisible ? "block" : "hidden"
-        }`}
-      >
-        <h2 className="text-xl font-bold mb-4 text-center">Dashboard</h2>
-        <nav>
-          <ul>
-            <li className="mb-2">
-              <a
-                href="#"
-                className="text-blue-600 hover:text-blue-800 transition duration-300"
-              >
-                Home
-              </a>
-            </li>
-            <li className="mb-2">
-              <a
-                href="#"
-                className="text-gray-800 hover:text-blue-800 transition duration-300"
-              >
-                Analytics
-              </a>
-            </li>
-            <li className="mb-2">
-              <a
-                href="#"
-                className="text-gray-800 hover:text-blue-800 transition duration-300"
-              >
-                Settings
-              </a>
-            </li>
-          </ul>
-        </nav>
-      </aside>
-
-      {/* Main Content */}
-      <main className="flex-1 p-6 bg-white rounded-lg shadow-lg ml-4 mr-4 mt-4 mb-4">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-3xl font-semibold text-gray-800">
-            Welcome to your dashboard
-          </h1>
-          {/* Sidebar toggle button */}
+    <div
+      className={`min-h-screen flex ${
+        isDarkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-800"
+      }`}
+    >
+      <main className="flex-1 p-6">
+        <header className="flex items-center justify-between mb-8">
+          <h1 className="text-3xl font-semibold">My Dashboard</h1>
           <button
-            onClick={toggleSidebar}
-            className="text-blue-600 hover:text-blue-800 transition duration-300"
-            aria-label="Toggle Sidebar"
+            onClick={toggleDarkMode}
+            className={`p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
+              isDarkMode
+                ? "bg-gray-800 text-white hover:bg-gray-700"
+                : "bg-white text-gray-800 shadow-sm hover:bg-gray-100 border border-gray-200"
+            }`}
+            aria-label={
+              isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"
+            }
           >
-            {isSidebarVisible ? "❌ Close Sidebar" : "➡ Open Sidebar"}
+            {isDarkMode ? (
+              <MoonIcon className="w-6 h-6" />
+            ) : (
+              <SunIcon className="w-6 h-6" />
+            )}
           </button>
-        </div>
+        </header>
 
-        <DashboardGrid />
+        <DashboardGrid isDarkMode={isDarkMode} />
       </main>
     </div>
   );

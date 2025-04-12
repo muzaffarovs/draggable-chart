@@ -1,15 +1,18 @@
-const STORAGE_KEY = "dashboard-layout";
+export const saveLayout = (widgets: any[]) => {
+  localStorage.setItem("dashboardLayout", JSON.stringify(widgets));
+};
 
-export function saveLayout(layout: any) {
-  if (typeof window !== "undefined") {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(layout));
-  }
-}
+export const loadLayout = () => {
+  const stored = localStorage.getItem("dashboardLayout");
+  return stored ? JSON.parse(stored) : null;
+};
 
-export function loadLayout(): any | null {
-  if (typeof window !== "undefined") {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : null;
-  }
-  return null;
-}
+// For saving and loading ToDo tasks
+export const saveTasks = (widgetId: string, tasks: string[]) => {
+  localStorage.setItem(`tasks-${widgetId}`, JSON.stringify(tasks));
+};
+
+export const loadTasks = (widgetId: string) => {
+  const storedTasks = localStorage.getItem(`tasks-${widgetId}`);
+  return storedTasks ? JSON.parse(storedTasks) : [];
+};
