@@ -20,7 +20,6 @@ interface DashboardGridProps {
 
 const DashboardGrid: React.FC<DashboardGridProps> = ({ isDarkMode }) => {
   const [widgets, setWidgets] = useState<WidgetDefinition[]>([]);
-  const [widgetType, setWidgetType] = useState<string>("Chart");
 
   useEffect(() => {
     const stored = loadLayout();
