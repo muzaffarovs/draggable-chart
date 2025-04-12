@@ -99,6 +99,7 @@ export default function DashboardGrid() {
         isResizable
         isDraggable
         onLayoutChange={handleLayoutChange}
+        allowOverlap={false}
       >
         {widgets.map((widget) => (
           <div
