@@ -1,84 +1,91 @@
-import React, { useState } from "react";
+import React from "react";
+import { Line } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip,
+  Legend,
+} from "chart.js";
+
+// Register necessary components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 interface WidgetProps {
-  type: string;
   id: string;
   removeWidget: (id: string) => void;
+  isDarkMode: boolean; // Receive isDarkMode
 }
 
-const Widget: React.FC<WidgetProps> = ({ type, id, removeWidget }) => {
+const Widget: React.FC<WidgetProps> = ({ id, removeWidget, isDarkMode }) => {
+  const chartData = {
+    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"],
+    datasets: [
+      {
+        label: "Data Points",
+        data: [65, 59, 80, 81, 56, 55, 40],
+        borderColor: isDarkMode
+          ? "rgba(129, 140, 248, 1)"
+          : "rgb(59, 130, 246)", // Theme-aware color
+        backgroundColor: isDarkMode
+          ? "rgba(129, 140, 248, 0.2)"
+          : "rgba(59, 130, 246, 0.2)",
+        fill: true,
+      },
+    ],
+  };
+
   return (
-    <div className="bg-white rounded-xl p-4 shadow-lg border relative overflow-hidden">
+    <div
+      className={`relative flex flex-col overflow-hidden rounded-md p-4 h-full ${
+        isDarkMode ? "bg-gray-800 text-white" : "bg-white text-gray-800"
+      }`}
+    >
       <button
         onClick={() => removeWidget(id)}
-        className="absolute z-50 top-2 right-2 text-red-500 hover:text-red-700 transition duration-200"
+        className={`absolute top-2 right-2 text-gray-400 hover:text-red-500 transition duration-200 focus:outline-none ${
+          isDarkMode ? "hover:text-red-500" : "hover:text-red-700"
+        }`}
         title="Remove widget"
       >
-        ❌
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={1.5}
+          stroke="currentColor"
+          className="w-5 h-5"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M6 18L18 6M6 6l12 12"
+          />
+        </svg>
       </button>
-      <h3 className="font-semibold text-lg mb-4">{type}</h3>
-      {type === "Chart" && (
-        <div className="bg-gray-200 h-24 rounded-xl flex items-center justify-center">
-          <span className="text-gray-500">Chart goes here</span>
-        </div>
-      )}
-      {type === "ToDo" && <ToDoWidget />}
-      {type === "Note" && (
-        <div className="bg-gray-200 h-24 rounded-xl flex items-center justify-center">
-          <span className="text-gray-500">Note goes here</span>
-        </div>
-      )}
-    </div>
-  );
-};
+      <h3 className="font-semibold text-lg mb-3">Chart</h3>
 
-const ToDoWidget = () => {
-  const [tasks, setTasks] = useState<string[]>([]);
-  const [task, setTask] = useState<string>("");
-
-  const addTask = () => {
-    if (task) {
-      setTasks([...tasks, task]);
-      setTask("");
-    }
-  };
-
-  const removeTask = (index: number) => {
-    const updatedTasks = tasks.filter((_, i) => i !== index);
-    setTasks(updatedTasks);
-  };
-
-  return (
-    <div>
-      <input
-        type="text"
-        value={task}
-        onChange={(e) => setTask(e.target.value)}
-        className="border p-2 rounded w-full mb-2"
-        placeholder="Add new task"
-      />
-      <button
-        onClick={addTask}
-        className="bg-blue-500 text-white px-4 py-2 rounded w-full"
-      >
-        Add Task
-      </button>
-      <ul className="mt-2 space-y-2">
-        {tasks.map((t, index) => (
-          <li
-            key={index}
-            className="flex justify-between items-center p-2 bg-gray-100 rounded-lg"
-          >
-            <span>{t}</span>
-            <button
-              onClick={() => removeTask(index)}
-              className="text-red-500 hover:text-red-700 transition duration-200 absolute z-50"
-            >
-              ❌
-            </button>
-          </li>
-        ))}
-      </ul>
+      <div className="rounded-md flex-grow w-full">
+        <Line
+          data={chartData}
+          options={{
+            responsive: true,
+            maintainAspectRatio: false,
+          }}
+          style={{ width: "100%", height: "100%" }}
+        />
+      </div>
     </div>
   );
 };

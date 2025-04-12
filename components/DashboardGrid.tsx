@@ -1,23 +1,37 @@
 "use client";
+import React, { useCallback, useEffect, useState } from "react";
 import { Responsive, WidthProvider, Layout } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
-import React, { useEffect, useState } from "react";
 import { saveLayout, loadLayout } from "@/utils/storage";
 import { v4 as uuidv4 } from "uuid";
 import Widget from "./Widget";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
-interface Widget {
+interface WidgetDefinition {
   id: string;
   layout: Layout;
-  type: string;
 }
 
-export default function DashboardGrid() {
-  const [widgets, setWidgets] = useState<Widget[]>([]);
-  const [widgetType, setWidgetType] = useState<string>("Chart");
+interface DashboardGridProps {
+  isDarkMode: boolean;
+}
+
+const DashboardGrid: React.FC<DashboardGridProps> = ({ isDarkMode }) => {
+  const [widgets, setWidgets] = useState<WidgetDefinition[]>([]);
+
+  const handleLayoutChange = useCallback(
+    (newLayout: Layout[]) => {
+      const updated = widgets.map((w) => {
+        const layout = newLayout.find((l) => l.i === w.layout.i); // Use layout.i for matching
+        return layout ? { ...w, layout: { ...w.layout, ...layout } } : w; // Merge existing layout
+      });
+      setWidgets(updated);
+      saveLayout(updated);
+    },
+    [widgets]
+  );
 
   useEffect(() => {
     const stored = loadLayout();
@@ -25,28 +39,19 @@ export default function DashboardGrid() {
       setWidgets(stored);
     } else {
       setWidgets([
-        { id: "1", layout: { i: "1", x: 0, y: 0, w: 2, h: 2 }, type: "Chart" },
-        { id: "2", layout: { i: "2", x: 2, y: 0, w: 2, h: 2 }, type: "ToDo" },
-        { id: "3", layout: { i: "3", x: 4, y: 0, w: 2, h: 2 }, type: "Note" },
+        {
+          id: uuidv4(),
+          layout: { i: uuidv4(), x: 0, y: 0, w: 2, h: 2 },
+        },
       ]);
     }
-  }, []);
-
-  const handleLayoutChange = (newLayout: Layout[]) => {
-    const updated = widgets.map((w) => {
-      const layout = newLayout.find((l) => l.i === w.id);
-      return layout ? { ...w, layout } : w;
-    });
-    setWidgets(updated);
-    saveLayout(updated);
-  };
+  }, [handleLayoutChange]);
 
   const addWidget = () => {
     const id = uuidv4();
-    const newWidget: Widget = {
+    const newWidget: WidgetDefinition = {
       id,
       layout: { i: id, x: 0, y: Infinity, w: 2, h: 2 },
-      type: widgetType,
     };
     const updated = [...widgets, newWidget];
     setWidgets(updated);
@@ -60,42 +65,46 @@ export default function DashboardGrid() {
   };
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <h1 className="text-4xl font-semibold text-center mb-6 text-gray-800">
-        My Dashboard
-      </h1>
-
-      <div className="flex justify-between items-center mb-4">
-        <div className="flex items-center">
-          <label htmlFor="widgetType" className="mr-2 text-lg font-medium">
-            Select Widget Type:
+    <div
+      className={`p-6 rounded-lg shadow-md ${
+        isDarkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-800" // Subtle shadow
+      }`}
+    >
+      <h2 className="text-2xl font-semibold mb-4">Dashboard Overview</h2>
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex items-center space-x-3">
+          <label htmlFor="widgetType" className="text-lg font-medium">
+            Add Widget:
           </label>
-          <select
-            id="widgetType"
-            value={widgetType}
-            onChange={(e) => setWidgetType(e.target.value)}
-            className="p-2 rounded-lg border border-gray-300 shadow-sm hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+          <button
+            onClick={addWidget}
+            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
           >
-            <option value="Chart">Chart</option>
-            <option value="ToDo">ToDo List</option>
-            <option value="Note">Note</option>
-          </select>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-5 h-5 inline-block mr-1"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 4.5v15m7.5-7.5h-15"
+              />
+            </svg>
+            Add
+          </button>
         </div>
-
-        <button
-          onClick={addWidget}
-          className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition"
-        >
-          ➕ Add Widget
-        </button>
+        {/* Optional: Add a "Reset Layout" button here if needed */}
       </div>
-
       <ResponsiveGridLayout
         className="layout"
         layouts={{ lg: widgets.map((w) => w.layout) }}
-        breakpoints={{ lg: 1024, md: 768, sm: 480 }}
-        cols={{ lg: 6, md: 4, sm: 2 }}
-        rowHeight={120}
+        breakpoints={{ lg: 1200, md: 992, sm: 768, xs: 480, xxs: 0 }} // More common breakpoints
+        cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }} // More flexible columns
+        rowHeight={100} // Adjust as needed
         isResizable
         isDraggable
         onLayoutChange={handleLayoutChange}
@@ -104,16 +113,26 @@ export default function DashboardGrid() {
         {widgets.map((widget) => (
           <div
             key={widget.id}
-            className="bg-white border-2 border-gray-200 rounded-lg shadow-lg p-4 hover:shadow-xl transition"
+            className={`rounded-md shadow-sm overflow-hidden ${
+              isDarkMode
+                ? "bg-gray-800 border-gray-700"
+                : "bg-white border-gray-200"
+            }`}
+            style={{
+              border: "1px solid",
+              borderColor: isDarkMode ? "#4a5568" : "#e2e8f0",
+            }}
           >
             <Widget
-              type={widget.type}
               id={widget.id}
               removeWidget={removeWidget}
+              isDarkMode={isDarkMode}
             />
           </div>
         ))}
       </ResponsiveGridLayout>
     </div>
   );
-}
+};
+
+export default DashboardGrid;
