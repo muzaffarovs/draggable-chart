@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Responsive, WidthProvider, Layout } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
@@ -21,6 +21,18 @@ interface DashboardGridProps {
 const DashboardGrid: React.FC<DashboardGridProps> = ({ isDarkMode }) => {
   const [widgets, setWidgets] = useState<WidgetDefinition[]>([]);
 
+  const handleLayoutChange = useCallback(
+    (newLayout: Layout[]) => {
+      const updated = widgets.map((w) => {
+        const layout = newLayout.find((l) => l.i === w.layout.i); // Use layout.i for matching
+        return layout ? { ...w, layout: { ...w.layout, ...layout } } : w; // Merge existing layout
+      });
+      setWidgets(updated);
+      saveLayout(updated);
+    },
+    [widgets]
+  );
+
   useEffect(() => {
     const stored = loadLayout();
     if (stored) {
@@ -33,16 +45,7 @@ const DashboardGrid: React.FC<DashboardGridProps> = ({ isDarkMode }) => {
         },
       ]);
     }
-  }, []);
-
-  const handleLayoutChange = (newLayout: Layout[]) => {
-    const updated = widgets.map((w) => {
-      const layout = newLayout.find((l) => l.i === w.layout.i); // Use layout.i for matching
-      return layout ? { ...w, layout: { ...w.layout, ...layout } } : w; // Merge existing layout
-    });
-    setWidgets(updated);
-    saveLayout(updated);
-  };
+  }, [handleLayoutChange]);
 
   const addWidget = () => {
     const id = uuidv4();
@@ -67,7 +70,7 @@ const DashboardGrid: React.FC<DashboardGridProps> = ({ isDarkMode }) => {
         isDarkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-800" // Subtle shadow
       }`}
     >
-      <h2 className="text-2xl font-semibold mb-4">Dashboard Overview</h2>{" "}
+      <h2 className="text-2xl font-semibold mb-4">Dashboard Overview</h2>
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center space-x-3">
           <label htmlFor="widgetType" className="text-lg font-medium">

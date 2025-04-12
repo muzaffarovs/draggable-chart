@@ -7,7 +7,6 @@ export const loadLayout = () => {
   return stored ? JSON.parse(stored) : null;
 };
 
-// For saving and loading ToDo tasks
 export const saveTasks = (widgetId: string, tasks: string[]) => {
   localStorage.setItem(`tasks-${widgetId}`, JSON.stringify(tasks));
 };
