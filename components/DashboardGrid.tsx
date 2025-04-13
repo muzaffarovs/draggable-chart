@@ -45,7 +45,7 @@ const DashboardGrid: React.FC<DashboardGridProps> = ({ isDarkMode }) => {
         },
       ]);
     }
-  }, [handleLayoutChange]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const addWidget = () => {
     const id = uuidv4();
