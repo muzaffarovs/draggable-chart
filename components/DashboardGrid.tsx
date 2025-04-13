@@ -45,7 +45,8 @@ const DashboardGrid: React.FC<DashboardGridProps> = ({ isDarkMode }) => {
         },
       ]);
     }
-  }, [handleLayoutChange]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  //dependency yo'qligi uchun eslint build vaqtida warning berishi munkun
 
   const addWidget = () => {
     const id = uuidv4();
@@ -108,7 +109,6 @@ const DashboardGrid: React.FC<DashboardGridProps> = ({ isDarkMode }) => {
         isResizable
         isDraggable
         onLayoutChange={handleLayoutChange}
-        allowOverlap={false}
       >
         {widgets.map((widget) => (
           <div
