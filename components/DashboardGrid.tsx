@@ -108,6 +108,7 @@ const DashboardGrid: React.FC<DashboardGridProps> = ({ isDarkMode }) => {
         isResizable
         isDraggable
         onLayoutChange={handleLayoutChange}
+        allowOverlap={false}
       >
         {widgets.map((widget) => (
           <div
