@@ -12,6 +12,7 @@ const ResponsiveGridLayout = WidthProvider(Responsive);
 interface WidgetDefinition {
   id: string;
   layout: Layout;
+  type: string;
 }
 
 interface DashboardGridProps {
@@ -20,6 +21,7 @@ interface DashboardGridProps {
 
 const DashboardGrid: React.FC<DashboardGridProps> = ({ isDarkMode }) => {
   const [widgets, setWidgets] = useState<WidgetDefinition[]>([]);
+  const [chart, setChart] = useState<string>("chartData");
 
   const handleLayoutChange = useCallback(
     (newLayout: Layout[]) => {
@@ -42,6 +44,7 @@ const DashboardGrid: React.FC<DashboardGridProps> = ({ isDarkMode }) => {
         {
           id: uuidv4(),
           layout: { i: uuidv4(), x: 0, y: 0, w: 2, h: 2 },
+          type: chart,
         },
       ]);
     }
@@ -53,6 +56,7 @@ const DashboardGrid: React.FC<DashboardGridProps> = ({ isDarkMode }) => {
     const newWidget: WidgetDefinition = {
       id,
       layout: { i: id, x: 0, y: Infinity, w: 2, h: 2 },
+      type: chart,
     };
     const updated = [...widgets, newWidget];
     setWidgets(updated);
@@ -77,6 +81,15 @@ const DashboardGrid: React.FC<DashboardGridProps> = ({ isDarkMode }) => {
           <label htmlFor="widgetType" className="text-lg font-medium">
             Add Widget:
           </label>
+          <select
+            name="chart"
+            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+            onChange={(e) => setChart(e.target.value)}
+          >
+            <option value="chartData">Line</option>
+            <option value="DoughnutData">Doughnut</option>
+            <option value="PolarData">PolarArea</option>
+          </select>
           <button
             onClick={addWidget}
             className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
@@ -127,6 +140,7 @@ const DashboardGrid: React.FC<DashboardGridProps> = ({ isDarkMode }) => {
               id={widget.id}
               removeWidget={removeWidget}
               isDarkMode={isDarkMode}
+              type={widget.type}
             />
           </div>
         ))}

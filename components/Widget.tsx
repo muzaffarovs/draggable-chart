@@ -1,5 +1,5 @@
 import React from "react";
-import { Line } from "react-chartjs-2";
+import { Line, Doughnut, PolarArea } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -9,7 +9,10 @@ import {
   Title,
   Tooltip,
   Legend,
+  ArcElement,
+  RadialLinearScale,
 } from "chart.js";
+import { chartData, DoughnutData, PolarData } from "./dataset";
 
 // Register necessary components
 ChartJS.register(
@@ -17,6 +20,8 @@ ChartJS.register(
   LinearScale,
   LineElement,
   PointElement,
+  ArcElement,
+  RadialLinearScale,
   Title,
   Tooltip,
   Legend
@@ -26,26 +31,22 @@ interface WidgetProps {
   id: string;
   removeWidget: (id: string) => void;
   isDarkMode: boolean; // Receive isDarkMode
+  type: string;
 }
 
-const Widget: React.FC<WidgetProps> = ({ id, removeWidget, isDarkMode }) => {
-  const chartData = {
-    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"],
-    datasets: [
-      {
-        label: "Data Points",
-        data: [65, 59, 80, 81, 56, 55, 40],
-        borderColor: isDarkMode
-          ? "rgba(129, 140, 248, 1)"
-          : "rgb(59, 130, 246)", // Theme-aware color
-        backgroundColor: isDarkMode
-          ? "rgba(129, 140, 248, 0.2)"
-          : "rgba(59, 130, 246, 0.2)",
-        fill: true,
-      },
-    ],
-  };
+const chartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+};
 
+const chartStyle = { width: "100%", height: "100%" };
+
+const Widget: React.FC<WidgetProps> = ({
+  id,
+  removeWidget,
+  isDarkMode,
+  type,
+}) => {
   return (
     <div
       className={`relative flex flex-col overflow-hidden rounded-md p-4 h-full ${
@@ -77,14 +78,23 @@ const Widget: React.FC<WidgetProps> = ({ id, removeWidget, isDarkMode }) => {
       <h3 className="font-semibold text-lg mb-3">Chart</h3>
 
       <div className="rounded-md flex-grow w-full">
-        <Line
-          data={chartData}
-          options={{
-            responsive: true,
-            maintainAspectRatio: false,
-          }}
-          style={{ width: "100%", height: "100%" }}
-        />
+        {type == "chartData" && (
+          <Line data={chartData} options={chartOptions} style={chartStyle} />
+        )}
+        {type == "DoughnutData" && (
+          <Doughnut
+            data={DoughnutData}
+            options={chartOptions}
+            style={chartStyle}
+          />
+        )}
+        {type == "PolarData" && (
+          <PolarArea
+            data={PolarData}
+            options={chartOptions}
+            style={chartStyle}
+          />
+        )}
       </div>
     </div>
   );
